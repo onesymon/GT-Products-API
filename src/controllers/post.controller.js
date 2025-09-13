@@ -1,10 +1,14 @@
 // src/controllers/post.controller.js
 import * as postService from '../services/post.service.js';
 
-export const getAllPosts = (req, res) => {
-    const posts = postService.getAllPosts();
-    res.json(posts);
-};
+export const getAllPosts = async (req, res) => {
+        try {
+            const posts = await postService.getAllPosts();
+            res.json(posts);
+        } catch (error) {
+            res.status(500).json({ message: 'Error retrieving posts', error: error.message });
+        }
+    };
 
 export const getPostById = (req, res) => {
     const postId = parseInt(req.params.id, 10);
