@@ -1,33 +1,40 @@
 // src/controllers/post.controller.js
 import * as postService from '../services/post.service.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
+import asyncHandler from 'express-async-handler';
 
 export const getAllPosts = async (req, res) => {
-        try {
-            const posts = await postService.getAllPosts();
-            res.json(posts);
-        } catch (error) {
-            res.status(500).json({ message: 'Error retrieving posts', error: error.message });
-        }
-    };
+    try {
+        const posts = await postService.getAllPosts();
+        return res
+            .status(200)
+            .json(new ApiResponse(200, posts, "Posts retrieved successfully"));
+    } catch (error) {
+        //...
+    }
+};
 
-export const getPostById = (req, res) => {
+export const getPostById = asyncHandler(async (req, res) => {
     const postId = parseInt(req.params.id, 10);
-    const post = postService.getPostById(postId);
-    if (!post) {
-        return res.status(404).json({ message: 'Post not found.' });
-    }
-    res.json(post);
-};
+    const post = await postService.getPostById(postId);
 
-export const createPost = (req, res) => {
-    const { title, content } = req.body;
-    if (!title || !content) {
-        return res.status(400).json({ message: 'Title and content are required.' });
+    return res
+        .status(200)
+        .json(new ApiResponse(200, post, "Post retrieved successfully"));
+});
+export const createPost = async (req, res) => {
+    try {
+        // The data is guaranteed to be valid here
+        const newPost = await postService.createPost(req.body);
+        return res
+            .status(201)
+            .json(new ApiResponse(201, newPost, "Post created successfully"));
+    } catch (error) {
+        return res
+            .status(500)
+            .json(new ApiResponse(500, null, "An error occurred while creating the post"));
     }
-    const newPost = postService.createPost({ title, content });
-    res.status(201).json(newPost);
 };
-
 export const updatePost = (req, res) => {
     const postId = parseInt(req.params.id, 10);
     const post = postService.updatePost(postId, req.body);

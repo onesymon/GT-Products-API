@@ -3,6 +3,7 @@ import { Router } from 'express';
 import * as postController from '../controllers/post.controller.js';
 // *** IMPORT THE COMMENT CONTROLLER ***
 import * as commentController from '../controllers/comment.controllers.js';
+import { validatePost } from '../middlewares/validator.middleware.js';
 
 const router = Router();
 

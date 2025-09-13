@@ -5,6 +5,7 @@ import postRoutes from './src/routes/post.routes.js';
 import commentRoutes from './src/routes/comment.routes.js';
 import config from './src/config/index.js';
 import { testConnection } from './src/config/db.js'; // Import the test function
+import { errorHandler } from './src/middlewares/errorHandler.middleware.js'; // IMPORT
 
 const app = express();
 
@@ -18,6 +19,9 @@ app.use(express.json());
 // Mount the post routes
 app.use('/posts', postRoutes);
 app.use('/comments', commentRoutes);
+
+// CENTRAL ERROR HANDLER MIDDLEWARE
+app.use(errorHandler); // ADD THIS AT THE END
 
 
 app.listen(config.port, () => {
