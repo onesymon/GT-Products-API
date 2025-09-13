@@ -1,5 +1,5 @@
 // src/controllers/comment.controller.js
-import * as commentService from '../services/comment.service.js';
+import * as commentService from '../services/comment.services.js';
 
 export const getAllComments = (req, res) => {
     const comments = commentService.getAllComments();

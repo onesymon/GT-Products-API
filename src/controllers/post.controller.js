@@ -43,7 +43,7 @@ export const deletePost = (req, res) => {
 };
 
 
-const patchPost = (req, res) => {
+export const partiallyUpdatePost = (req, res) => {
   const { id } = req.params;
   const updatedPost = postService.updatePostPartial(id, req.body);
 
