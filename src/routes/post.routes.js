@@ -9,7 +9,7 @@ const router = Router();
 
 // --- Post Routes ---
 router.get('/', postController.getAllPosts);
-router.post('/', postController.createPost);
+router.post('/', validatePost, postController.createPost);
 router.get('/:id', postController.getPostById);
 router.put('/:id', postController.updatePost);
 router.patch('/:id', postController.partiallyUpdatePost); // From Challenge 1

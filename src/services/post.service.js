@@ -25,13 +25,23 @@ export const getPostById = async (id) => {
 };
 
 export const createPost = async (postData) => {
-    const { title, content } = postData;
-    const [result] = await pool.query(
-        'INSERT INTO posts (title, content) VALUES (?, ?)',
-            [title, content]
-    );
-    const newPostId = result.insertId;
-    return getPostById(newPostId);
+    const { title, content, authorId } = postData;
+    
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO posts (title, content, authorId) VALUES (?, ?, ?)',
+            [title, content, authorId]
+        );
+        const newPostId = result.insertId;
+        return getPostById(newPostId);
+    } catch (error) {
+        // Handle foreign key constraint error (authorId doesn't exist)
+        if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+            throw new ApiError(400, "Invalid author ID. User does not exist.");
+        }
+        // Re-throw other errors
+        throw error;
+    }
 };
     export const updatePost = async (id, postData) => {
         const { title, content } = postData;

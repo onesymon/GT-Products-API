@@ -3,6 +3,7 @@ import express from 'express';
 import morgan from 'morgan'; // Import morgan
 import postRoutes from './src/routes/post.routes.js';
 import commentRoutes from './src/routes/comment.routes.js';
+import userRoutes from './src/routes/user.routes.js';
 import config from './src/config/index.js';
 import { testConnection } from './src/config/db.js'; // Import the test function
 import { errorHandler } from './src/middlewares/errorHandler.middleware.js'; // IMPORT
@@ -16,9 +17,10 @@ app.use(express.json());
 
 
 
-// Mount the post routes
-app.use('/posts', postRoutes);
-app.use('/comments', commentRoutes);
+// Mount the routes
+app.use('/api/users', userRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/comments', commentRoutes);
 
 // CENTRAL ERROR HANDLER MIDDLEWARE
 app.use(errorHandler); // ADD THIS AT THE END
