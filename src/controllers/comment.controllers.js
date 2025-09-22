@@ -1,30 +1,27 @@
-// src/controllers/comment.controller.js
+// src/controllers/comment.controllers.js
 import * as commentService from '../services/comment.services.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
+import asyncHandler from 'express-async-handler';
 
-export const getAllComments = (req, res) => {
-    const comments = commentService.getAllComments();
-    res.json(comments);
-};
+export const getAllComments = asyncHandler(async (req, res) => {
+    const comments = await commentService.getAllComments();
+    return res
+        .status(200)
+        .json(new ApiResponse(200, comments, "Comments retrieved successfully"));
+});
 
-export const getCommentsByPostId = (req, res) => {
+export const getCommentsByPostId = asyncHandler(async (req, res) => {
     const postId = parseInt(req.params.postId, 10);
-    const comments = commentService.getCommentsByPostId(postId);
-    res.json(comments);
-};
+    const comments = await commentService.getCommentsByPostId(postId);
+    return res
+        .status(200)
+        .json(new ApiResponse(200, comments, "Comments retrieved successfully"));
+});
 
-export const createCommentForPost = (req, res) => {
+export const createCommentForPost = asyncHandler(async (req, res) => {
     const postId = parseInt(req.params.postId, 10);
-    const { text } = req.body;
-
-    if (!text) {
-        return res.status(400).json({ message: 'Comment text is required.' });
-    }
-
-    const newComment = commentService.createComment(postId, { text });
-
-    if (!newComment) {
-        return res.status(404).json({ message: 'Post not found.' });
-    }
-
-    res.status(201).json(newComment);
-};
+    const newComment = await commentService.createComment(postId, req.body);
+    return res
+        .status(201)
+        .json(new ApiResponse(201, newComment, "Comment created successfully"));
+});

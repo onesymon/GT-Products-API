@@ -1,54 +1,58 @@
-// src/services/comment.service.js
+// src/services/comment.services.js
+import pool from '../config/db.js';
+import { ApiError } from '../utils/ApiError.js';
 
-// In-memory "database" for comments
-let comments = [
-    { id: 1, text: 'Great first post!', postId: 1 },
-    { id: 2, text: 'I agree, very insightful.', postId: 1 },
-    { id: 3, text: 'This is a comment on the second post.', postId: 2 },
-];
-let nextId = 4;
-
-// We need access to posts to ensure a post exists before adding a comment
-import { getPostById } from './post.service.js';
-
-export const getAllComments = () => {
+export const getAllComments = async () => {
+    const [comments] = await pool.query('SELECT * FROM comments');
     return comments;
 };
 
-export const getCommentsByPostId = (postId) => {
-    return comments.filter(c => c.postId === postId);
+export const getCommentsByPostId = async (postId) => {
+    const [comments] = await pool.query('SELECT * FROM comments WHERE postId = ?', [postId]);
+    return comments;
 };
 
-export const createComment = (postId, commentData) => {
-    // Check if the post actually exists before creating a comment for it
-    const post = getPostById(postId);
-    if (!post) {
-        return null; // Or throw an error
+export const createComment = async (postId, commentData) => {
+    const { content, authorId } = commentData;
+    
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO comments (content, postId, authorId) VALUES (?, ?, ?)',
+            [content, postId, authorId]
+        );
+        const newCommentId = result.insertId;
+        return getCommentById(newCommentId);
+    } catch (error) {
+        // Handle foreign key constraint error (authorId or postId doesn't exist)
+        if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+            throw new ApiError(400, "Invalid author ID or post ID. User or post does not exist.");
+        }
+        // Re-throw other errors
+        throw error;
     }
-    const newComment = { id: nextId++, postId, ...commentData };
-    comments.push(newComment);
-    return newComment;
 };
-// Additional functions for updating/deleting comments can be added as needed   
 
-// Example: Update a comment
-export const updateComment = (id, commentData) => {
-    const commentIndex = comments.findIndex(c => c.id === id);      
-    if (commentIndex === -1) {
-        return null; // Not found
+export const getCommentById = async (id) => {
+    const [rows] = await pool.query('SELECT * FROM comments WHERE id = ?', [id]);
+    if (!rows[0]) {
+        throw new ApiError(404, "Comment not found");
     }
-    comments[commentIndex] = { ...comments[commentIndex], ...commentData };
-    return comments[commentIndex];
-}
+    return rows[0];
+};
 
-
-
-// Example: Delete a comment
-export const deleteComment = (id) => {
-    const commentIndex = comments.findIndex(c => c.id === id);
-    if (commentIndex === -1) {
-        return false; // Not found
+export const updateComment = async (id, commentData) => {
+    const { content } = commentData;
+    const [result] = await pool.query(
+        'UPDATE comments SET content = ? WHERE id = ?',
+        [content, id]
+    );
+    if (result.affectedRows === 0) {
+        return null;
     }
-    comments.splice(commentIndex, 1);
-    return true;
-}   
+    return getCommentById(id);
+};
+
+export const deleteComment = async (id) => {
+    const [result] = await pool.query('DELETE FROM comments WHERE id = ?', [id]);
+    return result.affectedRows > 0;
+};

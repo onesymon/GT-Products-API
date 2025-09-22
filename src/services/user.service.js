@@ -34,3 +34,19 @@ export const getAllUsers = async () => {
     const [users] = await pool.query('SELECT * FROM users');
     return users;
 };
+
+export const getPostsByAuthorId = async (userId) => {
+    const [posts] = await pool.query(`
+        SELECT 
+            p.id,
+            p.title,
+            p.content,
+            p.authorId,
+            u.username AS authorUsername,
+            u.email AS authorEmail
+        FROM posts p
+        JOIN users u ON p.authorId = u.id
+        WHERE p.authorId = ?
+    `, [userId]);
+    return posts;
+};
