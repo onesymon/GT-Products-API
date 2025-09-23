@@ -12,20 +12,23 @@ export const getCommentsByPostId = async (postId) => {
     return comments;
 };
 
-export const createComment = async (postId, commentData) => {
-    const { content, authorId } = commentData;
+export const createComment = async (postId, authorId, commentData) => {
+    const { text } = commentData;
     
     try {
         const [result] = await pool.query(
-            'INSERT INTO comments (content, postId, authorId) VALUES (?, ?, ?)',
-            [content, postId, authorId]
+            'INSERT INTO comments (text, postId, authorId) VALUES (?, ?, ?)',
+            [text, postId, authorId]
         );
         const newCommentId = result.insertId;
-        return getCommentById(newCommentId);
+        
+        // Select the comment we just created
+        const [rows] = await pool.query('SELECT * FROM comments WHERE id = ?', [newCommentId]);
+        return rows[0];
     } catch (error) {
         // Handle foreign key constraint error (authorId or postId doesn't exist)
         if (error.code === 'ER_NO_REFERENCED_ROW_2') {
-            throw new ApiError(400, "Invalid author ID or post ID. User or post does not exist.");
+            throw new ApiError(400, "Invalid postId or authorId. The specified post or user does not exist.");
         }
         // Re-throw other errors
         throw error;

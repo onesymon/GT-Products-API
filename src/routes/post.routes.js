@@ -3,7 +3,7 @@ import { Router } from 'express';
 import * as postController from '../controllers/post.controller.js';
 // *** IMPORT THE COMMENT CONTROLLER ***
 import * as commentController from '../controllers/comment.controllers.js';
-import { validatePost } from '../middlewares/validator.middleware.js';
+import { validatePost, validateComment } from '../middlewares/validator.middleware.js';
 
 const router = Router();
 
@@ -19,6 +19,6 @@ router.delete('/:id', postController.deletePost);
 // GET /posts/:postId/comments
 router.get('/:postId/comments', commentController.getCommentsByPostId);
 // POST /posts/:postId/comments
-router.post('/:postId/comments', commentController.createCommentForPost);
+router.post('/:postId/comments', validateComment, commentController.createCommentForPost);
 
 export default router;

@@ -30,11 +30,11 @@ export const validatePost = [
 ];
 
 export const validateComment = [
-    // Content must not be empty and is sanitized
-    body('content')
+    // Text must not be empty and is sanitized
+    body('text')
         .trim()
         .notEmpty()
-        .withMessage('Comment content is required.'),
+        .withMessage('Comment text is required.'),
 
     // AuthorId must be a valid integer greater than or equal to 1
     body('authorId')
