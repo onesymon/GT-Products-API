@@ -23,6 +23,7 @@ app.use('/api/auth', authRoutes); // MOUNT
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
+app.use(errorHandler);
 
 // CENTRAL ERROR HANDLER MIDDLEWARE
 app.use(errorHandler); // ADD THIS AT THE END

@@ -8,4 +8,7 @@ const router = Router();
 // Define the registration endpoint
 router.post('/register', validateRegistration, authController.registerUser);
 
+// Define the login endpoint
+router.post('/login', authController.loginUser);
+
 export default router;

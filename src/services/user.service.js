@@ -1,6 +1,7 @@
 import pool from '../config/db.js';
 import { ApiError } from '../utils/ApiError.js';
 import bcrypt from 'bcrypt'; // IMPORT BCRYPT
+import jwt from 'jsonwebtoken';
 
 // This function will now be specifically for registration
 export const registerUser = async (userData) => {
@@ -58,4 +59,48 @@ export const getPostsByAuthorId = async (userId) => {
         WHERE p.authorId = ?
     `, [userId]);
     return posts;
+};
+
+// Login function to authenticate user and generate JWT
+export const loginUser = async (email, password) => {
+    try {
+        // Find user by email (including password for verification)
+        const [rows] = await pool.query('SELECT id, username, email, password FROM users WHERE email = ?', [email]);
+        
+        if (rows.length === 0) {
+            throw new ApiError(401, "Invalid email or password");
+        }
+        
+        const user = rows[0];
+        
+        // Compare the provided password with the hashed password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        
+        if (!isPasswordValid) {
+            throw new ApiError(401, "Invalid email or password");
+        }
+        
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            process.env.JWT_SECRET || 'your-secret-key',
+            { expiresIn: '7d' }
+        );
+        
+        // Return user data (without password) and token
+        return {
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email
+            },
+            token
+        };
+        
+    } catch (error) {
+        if (error instanceof ApiError) {
+            throw error;
+        }
+        throw new ApiError(500, "Login failed");
+    }
 };
