@@ -1,37 +1,46 @@
-// src/services/user.service.js
 import pool from '../config/db.js';
 import { ApiError } from '../utils/ApiError.js';
+import bcrypt from 'bcrypt'; // IMPORT BCRYPT
 
-export const createUser = async (userData) => {
-    const { username, email } = userData;
-    
+// This function will now be specifically for registration
+export const registerUser = async (userData) => {
+    const { username, email, password } = userData; // Destructure password
     try {
+        // HASH THE PASSWORD
+        const saltRounds = 10; // The cost factor for hashing
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
         const [result] = await pool.query(
-            'INSERT INTO users (username, email) VALUES (?, ?)',
-            [username, email]
+            // Use the new password column
+            'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+            // Store the HASHED password, not the original
+            [username, email, hashedPassword]
         );
-        const newUserId = result.insertId;
-        return getUserById(newUserId);
+
+        // Fetch the user, but OMIT the password from the return data
+        const newUser = await getUserById(result.insertId);
+        return newUser;
+
     } catch (error) {
-        // Handle duplicate entry error (username or email already exists)
         if (error.code === 'ER_DUP_ENTRY') {
             throw new ApiError(409, "Username or email already exists.");
         }
-        // Re-throw other errors
         throw error;
     }
 };
 
 export const getUserById = async (id) => {
-    const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
-    if (!rows[0]) {
+    // IMPORTANT: Exclude the password hash when fetching user data
+    const [rows] = await pool.query('SELECT id, username, email, createdAt FROM users WHERE id = ?', [id]);
+    if (rows.length === 0) {
         throw new ApiError(404, "User not found");
     }
     return rows[0];
 };
 
 export const getAllUsers = async () => {
-    const [users] = await pool.query('SELECT * FROM users');
+    // IMPORTANT: Exclude the password hash here too
+    const [users] = await pool.query('SELECT id, username, email, createdAt FROM users');
     return users;
 };
 

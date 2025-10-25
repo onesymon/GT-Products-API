@@ -4,6 +4,7 @@ import morgan from 'morgan'; // Import morgan
 import postRoutes from './src/routes/post.routes.js';
 import commentRoutes from './src/routes/comment.routes.js';
 import userRoutes from './src/routes/user.routes.js';
+import authRoutes from './src/routes/auth.routes.js'; // IMPORT
 import config from './src/config/index.js';
 import { testConnection } from './src/config/db.js'; // Import the test function
 import { errorHandler } from './src/middlewares/errorHandler.middleware.js'; // IMPORT
@@ -18,6 +19,7 @@ app.use(express.json());
 
 
 // Mount the routes
+app.use('/api/auth', authRoutes); // MOUNT
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
