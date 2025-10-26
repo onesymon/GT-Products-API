@@ -22,19 +22,15 @@ export const getPostById = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, post, "Post retrieved successfully"));
 });
-export const createPost = async (req, res) => {
-    try {
-        // The data is guaranteed to be valid here
-        const newPost = await postService.createPost(req.body);
-        return res
-            .status(201)
-            .json(new ApiResponse(201, newPost, "Post created successfully"));
-    } catch (error) {
-        return res
-            .status(500)
-            .json(new ApiResponse(500, null, "An error occurred while creating the post"));
-    }
-};
+export const createPost = asyncHandler(async (req, res) => {
+    // The authorId now comes from the authenticated user attached by the middleware
+    const authorId = req.user.id;
+    const postData = req.body;
+
+    const newPost = await postService.createPost(postData, authorId); // Pass authorId separately
+    res.status(201).json(new ApiResponse(201, newPost, "Post created successfully"));
+});
+
 export const updatePost = asyncHandler(async (req, res) => {
     const postId = parseInt(req.params.id, 10);
     const postData = req.body;

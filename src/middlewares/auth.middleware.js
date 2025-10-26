@@ -5,24 +5,26 @@ import { getUserById } from "../services/user.service.js";
 
 export const authMiddleware = asyncHandler(async (req, res, next) => {
   let token;
-
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
+  // Check for the token in the Authorization header
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
-      token = req.headers.authorization.split(" ")[1];
+        // Get token from header (e.g., "Bearer <token>")
+        token = req.headers.authorization.split(' ')[1];
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // Verify the token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      req.user = await getUserById(decoded.id);
+        // Get the user from the token's payload (id) and attach it to the request
+        // We fetch from DB to ensure the user still exists
+        req.user = await getUserById(decoded.id);
 
-      next();
+        next(); // Move to the next middleware or controller
     } catch (error) {
-      throw new ApiError(401, "Not authorized, token failed");
+        throw new ApiError(401, "Not authorized, token failed");
     }
-  }
-  if (!token) {
+}
+
+if (!token) {
     throw new ApiError(401, "Not authorized, no token");
-  }
+}
 });

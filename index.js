@@ -1,4 +1,6 @@
 // index.js
+import dotenv from 'dotenv';
+dotenv.config(); // This loads the .env file
 import express from 'express';
 import morgan from 'morgan'; // Import morgan
 import postRoutes from './src/routes/post.routes.js';
