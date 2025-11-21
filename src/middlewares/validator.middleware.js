@@ -56,6 +56,24 @@ export const validateCommentWithPostId = [
     },
 ];
 
+// Validator for updating comments (PUT/PATCH)
+export const validateCommentUpdate = [
+    // Content must not be empty and is sanitized
+    body('content')
+        .trim()
+        .notEmpty()
+        .withMessage('Comment content is required.'),
+
+    // This function handles the result of the validations
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    },
+];
+
 // ADD THIS NEW VALIDATOR
 export const validateRegistration = [
     body('username')

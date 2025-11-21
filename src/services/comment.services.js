@@ -7,10 +7,6 @@ export const getAllComments = async () => {
     return comments;
 };
 
-export const getCommentsByPostId = async (postId) => {
-    const [comments] = await pool.query('SELECT * FROM comments WHERE postId = ?', [postId]);
-    return comments;
-};
 
 export const createComment = async (postId, authorId, commentData) => {
     const { text } = commentData;
@@ -44,15 +40,27 @@ export const getCommentById = async (id) => {
 };
 
 export const updateComment = async (id, commentData) => {
-    const { content } = commentData;
+    const { text } = commentData;
     const [result] = await pool.query(
-        'UPDATE comments SET content = ? WHERE id = ?',
-        [content, id]
+        'UPDATE comments SET text = ? WHERE id = ?',
+        [text, id]
     );
     if (result.affectedRows === 0) {
         return null;
     }
     return getCommentById(id);
+};
+
+// Check if a user owns a specific comment
+export const isCommentOwner = async (commentId, userId) => {
+    const [rows] = await pool.query(
+        'SELECT authorId FROM comments WHERE id = ?',
+        [commentId]
+    );
+    if (!rows[0]) {
+        return false; // Comment doesn't exist
+    }
+    return rows[0].authorId === userId;
 };
 
 export const deleteComment = async (id) => {

@@ -1,9 +1,7 @@
 // src/routes/post.routes.js
 import { Router } from 'express';
 import * as postController from '../controllers/post.controller.js';
-// *** IMPORT THE COMMENT CONTROLLER ***
-import * as commentController from '../controllers/comment.controllers.js';
-import { validatePost, validateComment } from '../middlewares/validator.middleware.js';
+import { validatePost } from '../middlewares/validator.middleware.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
  
 
@@ -210,70 +208,5 @@ router.delete('/:id', authMiddleware, postController.deletePost);
  */
 router.patch('/:id', postController.partiallyUpdatePost); // From Challenge 1
 
-/**
- * @swagger
- * /api/v1/posts/{postId}/comments:
- *   get:
- *     summary: Get all comments for a specific post
- *     tags: [Comments]
- *     parameters:
- *       - in: path
- *         name: postId
- *         required: true
- *         schema:
- *           type: integer
- *         description: Post ID
- *     responses:
- *       200:
- *         description: List of comments for the post
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- */
-router.get('/:postId/comments', commentController.getCommentsByPostId);
-
-/**
- * @swagger
- * /api/v1/posts/{postId}/comments:
- *   post:
- *     summary: Create a comment for a specific post
- *     tags: [Comments]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: postId
- *         required: true
- *         schema:
- *           type: integer
- *         description: Post ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - content
- *             properties:
- *               content:
- *                 type: string
- *                 example: This is a great post!
- *     responses:
- *       201:
- *         description: Comment created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *       400:
- *         description: Validation error
- *       401:
- *         description: Unauthorized - Missing or invalid token
- *       404:
- *         description: Post not found
- */
-router.post('/:postId/comments', authMiddleware, validateComment, commentController.createCommentForPost);
 
 export default router;
